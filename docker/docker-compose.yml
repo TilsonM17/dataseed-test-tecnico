@@ -1,0 +1,46 @@
+version: '3.2'
+
+services:
+  php:
+    container_name: php8
+    build: 
+      context: .
+    working_dir: /var/www/
+    ports:
+      - 9000:9000
+    volumes:
+     - ../:/var/www/
+     - ./php/php.ini:/usr/local/etc/php/conf.d/php_conf.ini
+    networks:
+      - network
+  
+   #Nginx Service
+  webserver:
+    image: nginx:alpine
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../:/var/www
+      - ./nginx/:/etc/nginx/conf.d/
+    networks:
+      - network
+      
+  db:
+    image: mysql:latest
+    container_name: mysql
+    environment:
+      MYSQL_DATABASE: $DB_DATABASE
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+    ports:
+      - "3306:3306"
+    volumes:
+      - ~/.databases/mysql:/var/lib/mysql
+    networks:
+      - network
+
+networks:
+ network:
+    driver: bridge
